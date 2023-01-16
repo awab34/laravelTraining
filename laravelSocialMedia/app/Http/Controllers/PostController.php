@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Auth;
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
@@ -50,7 +51,7 @@ class PostController extends Controller
         
         $photo = $request->photo;
         $newPhoto = time().$photo->getClientOriginalName();
-        $photo->move('uploads/posts/'.$newPhoto);
+        $photo->move('uploads/posts',$newPhoto);
         $post = Post::create([
             'title'=>$request->title,
             'details'=>$request->details,
@@ -98,16 +99,22 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required|string',
             'details' => 'required|string',
+            'photo'=>'image'
         ]);
         if($request->has('photo')){
             $photo = $request->photo;
+            $photoToDelete =  public_path($post->photo);
             $newPhoto = time().$photo->getClientOriginalName();
-            $photo->move('uploads/posts/'.$newPhoto);
-            $request->photo = 'uploads/posts/'.$newPhoto;
+            $result  = $photo->move('uploads/posts',$newPhoto);
+            $post->photo = 'uploads/posts/'.$newPhoto;
+            
+            
+            File::delete($photoToDelete);
         }
-
-        $post->update($request->all());
-        return redirect()->route('post.index', ['success' => 'updated successfully']);
+        $post->title = $request->title;
+        $post->details = $request->details;
+        $post->save();
+        return redirect()->route('posts', ['success' => 'updated successfully']);
     }
 
     /**
@@ -120,13 +127,16 @@ class PostController extends Controller
     {
         $post = Post::find($id);
         $post->delete();
-        return redirect()->route('products.index', ['success' => 'deleted successfully']);
+        return redirect()->route('posts', ['success' => 'deleted successfully']);
     }
     public function hardDelete($id)
     {
         $post = Post::onlyTrashed()->where('id',$id)->first();
-        $post = forceDelete();
-        return redirect()->route('products.index', ['success' => 'deleted successfully']);
+        $photo =  public_path($post->photo);
+        File::delete($photo);
+        $post->forceDelete();
+
+        return redirect()->back();
     }
     public function trashed()
     {
@@ -136,6 +146,6 @@ class PostController extends Controller
     public function restore($id)
     {
         $posts = Post::onlyTrashed()->where('id',$id)->first()->restore(); 
-        return redirect()->route('products.index', ['success' => 'restored successfully']);
+        return redirect()->back();
     }
 }
