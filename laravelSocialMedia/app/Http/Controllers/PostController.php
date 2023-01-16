@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Auth;
 
 class PostController extends Controller
 {
@@ -12,9 +13,12 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct(){
+        $this->middleware('auth');
+    }
     public function index()
     {
-        $posts = Post::latest()->paginate(4);
+        $posts = Post::all();
         
 
         return view('post.index',compact('posts'));
@@ -39,13 +43,22 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
-            'price' => 'required|string',
+            'title' => 'required|string',
             'details' => 'required|string',
+            'photo' => 'required|image',
         ]);
-        $post = Post::create($request->all());
-
-        return redirect()->route('post.index',['success'=>'added successfully']);
+        
+        $photo = $request->photo;
+        $newPhoto = time().$photo->getClientOriginalName();
+        $photo->move('uploads/posts/'.$newPhoto);
+        $post = Post::create([
+            'title'=>$request->title,
+            'details'=>$request->details,
+            'photo'=>'uploads/posts/'.$newPhoto,
+            'user_id'=>Auth::id(),
+            'slug'=>str_slug($request->title)
+        ]);
+        return redirect()->back();
     }
 
     /**
@@ -56,7 +69,8 @@ class PostController extends Controller
      */
     public function show($slug)
     {
-        return view('post.show',compact('product'));
+        $post = Post::where('slug',$slug)->first();
+        return view('post.show',compact('post'));
     }
 
     /**
@@ -67,7 +81,8 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        return view('post.edit', ["product"=>$product]);
+        $post = Post::find($id);
+        return view('post.edit',compact('post'));
     }
 
     /**
@@ -79,7 +94,19 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $product->update($request->all());
+        $post = Post::find($id);
+        $request->validate([
+            'title' => 'required|string',
+            'details' => 'required|string',
+        ]);
+        if($request->has('photo')){
+            $photo = $request->photo;
+            $newPhoto = time().$photo->getClientOriginalName();
+            $photo->move('uploads/posts/'.$newPhoto);
+            $request->photo = 'uploads/posts/'.$newPhoto;
+        }
+
+        $post->update($request->all());
         return redirect()->route('post.index', ['success' => 'updated successfully']);
     }
 
@@ -89,24 +116,26 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        $product = product::onlyTrashed()->where('id',$id)->first()->forceDelete(); 
-        return redirect()->route('products.index', ['success' => 'deleted successfully']);
-    }
     public function softDelete($id)
     {
-        $product = product::find($id)->delete();
+        $post = Post::find($id);
+        $post->delete();
+        return redirect()->route('products.index', ['success' => 'deleted successfully']);
+    }
+    public function hardDelete($id)
+    {
+        $post = Post::onlyTrashed()->where('id',$id)->first();
+        $post = forceDelete();
         return redirect()->route('products.index', ['success' => 'deleted successfully']);
     }
     public function trashed()
     {
-        $products = product::onlyTrashed()->latest()->paginate(4);
-        return view('post.trash',compact('products'));
+        $posts = Post::onlyTrashed()->get();
+        return view('post.trashed')->with('posts',$posts);
     }
     public function restore($id)
     {
-        $product = product::onlyTrashed()->where('id',$id)->first()->restore(); 
-        return redirect()->route('products.index', ['success' => 'deleted successfully']);
+        $posts = Post::onlyTrashed()->where('id',$id)->first()->restore(); 
+        return redirect()->route('products.index', ['success' => 'restored successfully']);
     }
 }
