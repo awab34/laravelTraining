@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Auth;
 use Illuminate\Support\Facades\File;
@@ -32,7 +33,11 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('post.create');
+        $tags = Tag::all();
+        if($tags->count() == 0){
+            return redirect()->route('tag.create');
+        }
+        return view('post.create',compact('tags'));
     }
 
     /**
@@ -46,6 +51,7 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required|string',
             'details' => 'required|string',
+            'tags' => 'required',
             'photo' => 'required|image',
         ]);
         
@@ -59,6 +65,7 @@ class PostController extends Controller
             'user_id'=>Auth::id(),
             'slug'=>str_slug($request->title)
         ]);
+        $post->tags()->attach($request->tags);
         return redirect()->back();
     }
 
@@ -82,8 +89,9 @@ class PostController extends Controller
      */
     public function edit($id)
     {
+        $tags = Tag::all();
         $post = Post::find($id);
-        return view('post.edit',compact('post'));
+        return view('post.edit')->with('post',$post)->with('tags',$tags);
     }
 
     /**
@@ -99,6 +107,7 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required|string',
             'details' => 'required|string',
+            'tags' => 'required',
             'photo'=>'image'
         ]);
         if($request->has('photo')){
@@ -113,6 +122,7 @@ class PostController extends Controller
         }
         $post->title = $request->title;
         $post->details = $request->details;
+        $post->tags()->sync($request->tags);
         $post->save();
         return redirect()->route('posts', ['success' => 'updated successfully']);
     }

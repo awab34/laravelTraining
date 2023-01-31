@@ -35,3 +35,13 @@ Route::get('/post/show/{slug}', 'PostController@show')->name('post.show');
 Route::get('/post/delete/{id}', 'PostController@hardDelete')->name('post.delete');
 Route::get('/post/soft/delete/{id}', 'PostController@softDelete')->name('post.soft.delete');
 Route::get('/post/restore/{id}', 'PostController@restore')->name('post.restore');
+
+
+
+Route::get('/tags', 'TagController@index')->name('tags');
+Route::get('/tag/create', 'TagController@create')->name('tag.create');
+Route::post('/tag/store', 'TagController@store')->name('tag.store');
+Route::get('/tag/show/{id}', 'TagController@show')->name('tag.show');
+Route::get('/tag/delete/{id}', 'TagController@destroy')->name('tag.delete');
+Route::get('/tag/edit/{id}', 'TagController@edit')->name('tag.edit');
+Route::put('/tag/update/{id}', 'TagController@update')->name('tag.update');
