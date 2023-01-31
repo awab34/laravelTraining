@@ -20,7 +20,7 @@ class PostController extends Controller
     }
     public function index()
     {
-        $posts = Post::all();
+        $posts = Post::where('user_id',Auth::id())->get();
         
 
         return view('post.index',compact('posts'));
@@ -150,7 +150,9 @@ class PostController extends Controller
     }
     public function trashed()
     {
-        $posts = Post::onlyTrashed()->get();
+        // everybody can see it $posts = Post::onlyTrashed()->get();
+        // only the on e who created it can see it
+        $posts = Post::onlyTrashed()->where('user_id',Auth::id())->get();
         return view('post.trashed')->with('posts',$posts);
     }
     public function restore($id)
