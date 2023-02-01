@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('posts_tags');
+        Schema::dropIfExists('post_tag');
     }
 };
