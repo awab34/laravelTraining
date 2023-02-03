@@ -18,6 +18,8 @@ class Post extends Model
         'photo',
         'slug',
     ];
+
+    // hasMany()->whereNull('awab') bring me any record that have got the record awab null
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

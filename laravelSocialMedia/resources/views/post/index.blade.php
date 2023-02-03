@@ -33,8 +33,11 @@
             </td>
             <td>
                 <a href="{{route('post.show',['slug'=>$item->slug])}}">show</a>
+                @if ($item->user_id === Auth::id())
                 <a href="{{route('post.soft.delete',['id'=>$item->id])}}">delete</a>
                 <a href="{{route('post.edit',['id'=>$item->id])}}">edit</a>
+                @endif
+                
             </td>
         </tr>    
     @endforeach
