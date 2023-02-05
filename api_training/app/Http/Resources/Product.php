@@ -17,10 +17,12 @@ class Product extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'id'=>$request->id,
-            'name'=>$request->name,
-            'details'=>$request->details,
-            'price'=>$request->price,
+            'id'=>$this->id,
+            'name'=>$this->name,
+            'details'=>$this->details,
+            'price'=>$this->price,
+            'created_at' => $this->created_at->format('d/m/Y'),
+            'updated_at' => $this->updated_at->format('d/m/Y'),
             
         ];
     }

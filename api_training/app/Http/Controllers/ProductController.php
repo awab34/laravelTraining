@@ -19,7 +19,6 @@ class ProductController extends Controller
     {
         $products = Product::all();
         $BaseControllerObject = new basec();
-        
         return $BaseControllerObject->sendResponse(ProductResource::collection($products),'These are all of our products');
     }
 
@@ -79,6 +78,9 @@ class ProductController extends Controller
         }
         $input = $request->all();
         $product = Product::find($id);
+        if(is_null($product)){
+            return $BaseControllerObject->sendError('Product not found');
+        }
         $product->name = $input['name'];
         $product->details = $input['details'];
         $product->price = $input['price'];
@@ -96,6 +98,9 @@ class ProductController extends Controller
     {
         $BaseControllerObject = new basec();
         $product = Product::find($id);
+        if(is_null($product)){
+            return $BaseControllerObject->sendError('Product not found');
+        }
         $product->destroy($id);
         return $BaseControllerObject->sendResponse(new ProductResource($product),'The product was deleted successfully');
     }
