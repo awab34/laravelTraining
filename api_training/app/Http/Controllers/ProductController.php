@@ -18,24 +18,26 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all();
-
-        return $this->sendResponse(new ProductResource($products),'These are all of our products');
+        $BaseControllerObject = new basec();
+        
+        return $BaseControllerObject->sendResponse(ProductResource::collection($products),'These are all of our products');
     }
 
     
     public function store(Request $request)
     {
+        $BaseControllerObject = new basec();
         $validator = Validator::make($request->all(),[
             'name'=>'required|string',
             'details'=>'required|string',
             'price'=>'required',
         ]);
         if($validator->fails()){
-            return $this->sendError('please fill the required data',$validator->errors());
+            return $BaseControllerObject->sendError('please fill the required data',$validator->errors());
         }
         $input = $request->all();
         $product = Product::create($input);
-        return $this->sendResponse(new ProductResource($product),'The product was stored successfully');
+        return $BaseControllerObject->sendResponse(new ProductResource($product),'The product was stored successfully');
     }
 
     /**
@@ -46,11 +48,12 @@ class ProductController extends Controller
      */
     public function show($id)
     {
+        $BaseControllerObject = new basec();
         $product = Product::find($id);
         if(is_null($product)){
-            return $this->sendError('Product not found');
+            return $BaseControllerObject->sendError('Product not found');
         }
-        return $this->sendResponse(new ProductResource($product),'The product was found successfully');
+        return $BaseControllerObject->sendResponse(new ProductResource($product),'The product was found successfully');
     }
 
     
@@ -65,13 +68,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $BaseControllerObject = new basec();
         $validator = Validator::make($request->all(),[
             'name'=>'required|string',
             'details'=>'required|string',
             'price'=>'required',
         ]);
         if($validator->fails()){
-            return $this->sendError('please fill the required data',$validator->errors());
+            return $BaseControllerObject->sendError('please fill the required data',$validator->errors());
         }
         $input = $request->all();
         $product = Product::find($id);
@@ -79,7 +83,7 @@ class ProductController extends Controller
         $product->details = $input['details'];
         $product->price = $input['price'];
         $product->save();
-        return $this->sendResponse(new ProductResource($product),'The product was stored successfully');
+        return $BaseControllerObject->sendResponse(new ProductResource($product),'The product was stored successfully');
     }
 
     /**
@@ -90,8 +94,9 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
+        $BaseControllerObject = new basec();
         $product = Product::find($id);
         $product->destroy($id);
-        return $this->sendResponse(new ProductResource($product),'The product was deleted successfully');
+        return $BaseControllerObject->sendResponse(new ProductResource($product),'The product was deleted successfully');
     }
 }

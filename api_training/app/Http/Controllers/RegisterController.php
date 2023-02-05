@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class RegisterController extends Controller
 {
     public function register(Request $request){
+        $BaseControllerObject = new basec();
         $validator = Validator::make($request->all(),[
             'name'=>'required|string',
             'email'=>'required|email',
@@ -19,25 +20,26 @@ class RegisterController extends Controller
             'c_password'=>'required|same:password'
         ]);
         if($validator->fails()){
-            return $this->sendError('please fill the required data',$validator->errors());
+            return $BaseControllerObject->sendError('please fill the required data',$validator->errors());
         }
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
-        $success['token'] = $user->createToken('awab')->accessToken; 
+        $success['token'] = $user->createToken('awab'); 
         $success['name'] = $user->name;
-        return $this->sendResponse($success,'The user is account is registered successfully');
+        return $BaseControllerObject->sendResponse($success,'The user is account is registered successfully');
 
 }
 
 public function login(Request $request){
+    $BaseControllerObject = new basec();
     if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
         $user = Auth::user();
-        $success['token'] = $user->createToken('awab')->accessToken;
+        $success['token'] = $user->createToken('awab');
         $success['name'] = $user->name;
-        return $this->sendResponse($success,'The user is logged in successfully');
+        return $BaseControllerObject->sendResponse($success,'The user is logged in successfully');
     }else{
-        return $this->sendError('error in email or password',['error'=>'unautherized access']);
+        return $BaseControllerObject->sendError('error in email or password',['error'=>'unautherized access']);
     }
     
 
